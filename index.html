@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Application with File Upload</title>
+    <style>
+:root {
+    --page-primary: #212121;
+    --page-secondary: #2f2f2f;
+    --sidebar-primary: #171717;
+    --sidebar-secondary: #212121;
+    --purple-primary: #7C4DFF;
+    --purple-secondary: #BB86FC;
+    --hover-primary: #BB86FC66;
+    --text-primary: #EEEEEE;
+    --text-secondary: #9b9b9b;
+    --text-tertiary: #7C4DFF;
+    --scrollbar-track: #f1f1f1;
+    --scrollbar-thumb: #888;
+    --scrollbar-hover: #555;
+}
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: var(--page-primary);
+    color: var(--text-primary);
+}
+.container {
+    display: flex;
+    height: 100vh;
+    width: 100%;
+}
+.sidebar {
+    width: 20%;
+    padding: 20px;
+    background-color: var(--sidebar-primary);
+    display: flex;
+    flex-direction: column;
+}
+.file-upload {
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.file-button {
+    background-color: var(--purple-primary);
+    color: var(--text-primary);
+    border: none;
+    width: 95px;
+    text-align: center;
+    padding: 8px 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+input[type="file"] {
+    display: none; /* Hide the default file input */
+}
+.file-info {
+    margin-top: 10px;
+    color: var(--text-primary);
+    text-align: center;
+}
+.dot {
+    display: inline-block;
+    text-align: center;
+    width: 8px;
+    height: 8px;
+    margin: 0 2px;
+    background-color: var(--text-primary);
+    border-radius: 50%;
+    animation: bounce 1s infinite;
+}
+.dot:nth-child(1) {
+    animation-delay: 0.2s;
+}
+.dot:nth-child(2) {
+    animation-delay: 0.4s;
+}
+.dot:nth-child(3) {
+    animation-delay: 0.6s;
+}
+@keyframes bounce {
+    0%, 80%, 100% {
+        transform: scale(0);
+    }
+    40% {
+        transform: scale(1);
+    }
+}
+.file-button .dot, .llm-message .dot {
+    display: inline-block;
+    margin-left: 10px;
+}
+.questions-list {
+    background-color: var(--sidebar-secondary);
+    color: var(--text-primary);
+    border: none;
+    padding: 15px 32px;
+    margin-bottom: 5%;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    box-sizing: border-box;
+    font-size: large;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease-in, border-radius 0.3s ease-in, font-size 0.3s ease-in;
+}
+.questions-list:hover {
+    background-color: var(--hover-primary);
+    border-radius: 10px;
+    font-size: larger;
+    transition: background-color 0.3s ease-out, border-radius 0.3s ease-out, font-size 0.3s ease-out;
+}
+.chat-container {
+    width: 80%;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+.chat-box {
+    flex-grow: 1;
+    padding: 10px;
+    background-color: var(--page-primary);
+    margin-bottom: 10px;
+    margin-top: 10px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    border: none;
+}
+.progress-bar {
+    padding: 10px;
+    background-color: var(--page-primary);
+    margin-bottom: 2px;
+    margin-top: 2px;
+    color: var(--text-primary);
+    text-align: center;
+}
+.input-box {
+    display: flex;
+    align-items: center;
+}
+.input-box input[type="text"] {
+    flex-grow: 1;
+    padding: 10px;
+    border: 1px solid var(--page-secondary);
+    border-radius: 5px;
+    background-color: var(--page-secondary);
+    color: var(--text-primary);
+    font-size: 16px;
+}
+.input-box button {
+    background-color: var(--purple-primary);
+    color: var(--text-primary);
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-left: 10px;
+}
+.message-container {
+    clear: both;
+    overflow: hidden;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 0%;
+    margin-top: 0%;
+}
+.message-container p {
+    background-color: var(--page-secondary);
+    color: var(--text-primary);
+    padding-top: 5px;
+    padding-bottom: 15px;
+    padding-left: 30px;
+    padding-right: 30px;
+    border-radius: 5px;
+    word-wrap: break-word; /* Allow long words to break and wrap */
+    display: block;
+    box-sizing: border-box;
+    max-width: 100%;
+    margin-bottom: 10px;
+    margin-top: 5px;
+    transition: background-color 0.3s ease-in, border-radius 0.3s ease-in, font-size 0.3s ease-in;
+}
+.message-container.user-message {
+    text-align: right;
+    margin-bottom: 0%;
+    margin-top: 0%;
+}
+.message-container.llm-message {
+    text-align: left;
+    margin-bottom: 0%;
+    margin-top: 0%;
+}
+.message-container p:hover {
+    background-color: var(--hover-primary);
+    border-radius: 10px;
+    font-size: large;
+    transition: background-color 0.3s ease-out, border-radius 0.3s ease-out, font-size 0.3s ease-out;
+}
+#questionContainer {
+    background-color: var(--hover-primary);
+    color: var(--text-primary);
+    font-size: large;
+    font-weight: bold;
+    padding: 15px 25px;
+    width: 100%;
+    box-sizing: border-box;
+    margin-left: auto;
+    margin-right: auto;
+    border: none;
+    border-radius: 5px;
+}
+.message-header {
+    color: var(--text-secondary);
+    font-weight: bolder;
+    margin-bottom: 5px;
+    margin-top: 10px;
+}
+::-webkit-scrollbar {
+    width: 12px;
+}
+::-webkit-scrollbar-track {
+    background: var(--scrollbar-track);
+}
+::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb);
+    border-radius: 6px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--scrollbar-hover);
+}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar" id="sidebar">
+            <form class="file-upload" id="fileForm" enctype="multipart/form-data">
+                <label for="fileInput" class="file-button">Upload File</label>
+                <input type="file" id="fileInput" onchange="uploadFile(this)">
+                <div id="fileInfo" class="file-info">No File Chosen</div>
+            </form>
+        </div>
+        <div class="chat-container">
+            <h1>Chat Application</h1>
+            <div id="questionContainer">Your Question Will Appear Here After Uploading A File And Selecting A Question From The Sidebar</div>
+            <div class="chat-box" id="chatBox">
+                <!-- Chat messages will be displayed here -->
+            </div>
+            <div id="progressBar" class="progress-bar"></div>
+            <div class="input-box">
+                <input type="text" id="userInput" placeholder="Enter your question..." onkeypress="handleKeyPress(event)">
+                <button onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        var uploadedFilePath = null;
+        var uploadedFileName = null;
+        var questionsString = null;
+        var chatHistory = [];
+
+        function showLoadingDots(element) {
+            element.innerHTML = "<div id='fileUploadLoadingDots'><span class='dot'></span><span class='dot'></span><span class='dot'></span></div>";
+            document.getElementById('fileUploadLoadingDots').style.display = 'inline-block';
+        }
+
+        function hideLoadingDots() {
+            var loadingDotsId = document.getElementById('fileUploadLoadingDots');
+            loadingDotsId.remove();
+        }
+
+        function removeSidebarElements() {
+            var questions = document.querySelectorAll(".questions-list");
+            // Check if any elements with class "questions-list" exist
+            if (questions.length > 0) {
+                questions.forEach(function(element) {
+                    element.remove();
+                });
+            }
+        }
+
+        function createSidebarElements(questionsString) {
+            var sidebar = document.getElementById("sidebar");
+            var questionsJSON = JSON.parse(questionsString);   
+
+            Object.keys(questionsJSON).forEach(function (key) {
+            var questionButton = document.createElement('button');
+            questionButton.classList.add("questions-list");
+            questionButton.textContent = key;
+            questionButton.onclick = function () {
+                    var questionContainer = document.getElementById("questionContainer");
+                    var question = questionsJSON[key];
+                    questionContainer.textContent = question;
+
+                    var progBar = document.getElementById("progressBar");
+                    showLoadingDots(progBar);
+                    
+                    // Make AJAX request to server to get response
+                    var xhr = new XMLHttpRequest();  // Object to send/recieve data with server
+                    var llmResponse = null;
+                    xhr.onreadystatechange = function () {
+                        if (xhr.readyState === 4 && xhr.status === 200) {
+                            var responseJSON = JSON.parse(xhr.responseText);
+                            llmResponse = responseJSON.response;  // Sets llmResponse to response string
+                            chatHistory = responseJSON.chat_history;  // Sets chatHistory to chat_history list
+                            hideLoadingDots();
+
+                            var chatBox = document.getElementById('chatBox');
+                            // Removes all elements currently in chatBox
+                            while (chatBox.firstChild) {
+                                chatBox.removeChild(chatBox.firstChild);
+                            }
+                            var llmMessageContainer = document.createElement("div");  // Create a container div for LLM's message
+                            llmMessageContainer.classList.add("message-container", "llm-message");  // Add the new div element to the message-container and llm_message classes
+                            var llmMessage = document.createElement("p");  // Create a paragraph element for LLM's message
+                            llmMessage.innerHTML = "<h3 class='message-header'>Llama</h3> <br />" + llmResponse;  // Set content of new paragraph element
+                            llmMessageContainer.appendChild(llmMessage);  // Append LLM's message to the llm-message container
+                            chatBox.appendChild(llmMessageContainer);  // Append the container to the chat box
+
+                            chatBox.scrollTop = chatBox.scrollHeight;  // Scroll chat box to bottom
+                        }
+                    };
+                    xhr.open("POST", "/question_selection", true);
+                    xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+                    xhr.send(JSON.stringify({ question: question }));
+                };
+            sidebar.appendChild(questionButton);
+            });
+        }
+
+        function uploadFile(input) {
+            var fileInput = document.getElementById('fileInput');  // Set fileInput to equal the user-selected file(s)
+            var fileInfo = document.getElementById('fileInfo');
+            var file = fileInput.files[0];  // Set file to equal the first file selected by the user
+            if (!file) {
+                alert("No file chosen.");
+                return;
+            }
+
+            showLoadingDots(fileInfo);
+            removeSidebarElements();
+
+            var formData = new FormData();
+            formData.append('file', file)
+
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        var responseJSON = JSON.parse(xhr.responseText);
+                        uploadedFilePath = responseJSON.file_path;
+                        uploadedFileName = responseJSON.file_name;
+                        questionsString = JSON.stringify(responseJSON.questions_json);
+                        var fileInfo = document.querySelector('.file-info');
+                        hideLoadingDots();
+                        fileInfo.textContent = "";
+                        createSidebarElements(questionsString);
+                    } else {
+                        var fileInfo = document.querySelector('.file-info');
+                        fileInfo.textContent = "File Upload Failed";
+                    }
+                }
+            };
+            xhr.open('POST', '/upload_file', true);
+            xhr.send(formData);
+        }
+
+        function sendMessage() {
+            var userInput = document.getElementById("userInput").value;  // Set userInput variable to the text in the user input element
+
+            // Check if uploadedFilePath or userInput is empty
+            if (userInput.trim() === "" || uploadedFilePath === null) {
+                return;
+            }
+
+            var chatBox = document.getElementById("chatBox");  // Set variable chatBox to equal content of element with id chatBox
+            var llmResponse = null;  // Declare variable for storing llm response
+
+            var userMessageContainer = document.createElement("div");  // Create a container div for the user's message
+            userMessageContainer.classList.add("message-container", "user-message");  // Add the new div element to the message-container and user-message classes
+            var userMessage = document.createElement("p");  // Create a paragraph element for the user's message
+            userMessage.innerHTML = "<h3 class='message-header'>You</h3> <br />" + userInput;  // Set content of new paragraph element
+            userMessageContainer.appendChild(userMessage);  // Append the user's message to the user-message container
+            chatBox.appendChild(userMessageContainer);  // Append the container to the chatBox element
+            document.getElementById("userInput").value = "";  // Clear user input field
+
+            var progBar = document.getElementById("progressBar");
+            showLoadingDots(progBar);
+
+            // Make AJAX request to server to get response
+            var xhr = new XMLHttpRequest();  // Object to send/recieve data with server
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {  // Checks if request is complete and http response has been fully recieved (4), then checks if the request was successful (200)
+                    var responseJSON = JSON.parse(xhr.responseText);  // Set responseJSON variable to a parsed JavaScript object from a json formatted text
+                    llmResponse = responseJSON.response;  // Sets llmResponse to response string
+                    chatHistory = responseJSON.chat_history;  // Sets chatHistory to chat_history list
+                    hideLoadingDots();
+
+                    var llmMessageContainer = document.createElement("div");  // Create a container div for LLM's message
+                    llmMessageContainer.classList.add("message-container", "llm-message");  // Add the new div element to the message-container and llm_message classes
+                    var llmMessage = document.createElement("p");  // Create a paragraph element for LLM's message
+                    llmMessage.innerHTML = "<h3 class='message-header'>Llama</h3> <br />" + llmResponse;  // Set content of new paragraph element
+                    llmMessageContainer.appendChild(llmMessage);  // Append LLM's message to the llm-message container
+                    chatBox.appendChild(llmMessageContainer);  // Append the container to the chat box
+
+                    chatBox.scrollTop = chatBox.scrollHeight;  // Scroll chat box to bottom
+                }
+            };
+            xhr.open("POST", "/user_message", true);
+            xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+            xhr.send(JSON.stringify({ question: userInput, chat_history: chatHistory }));
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+                event.preventDefault(); // Prevent default form submission
+            }
+        }
+    </script>
+</body>
+</html>
